@@ -48,23 +48,31 @@ func lolify(in string) Lollipop {
     return Lollipop{in, in}
 }
 
+func lolJson(w http.ResponseWriter, c appengine.Context, out Lollipop) {
+    if marshalled, err := json.Marshal(out); err != nil {
+        c.Errorf("Trying to Marshal, but got error %v\n", err)
+        fmt.Fprintf(w, "{\"err\": \"Could not write requested data - probably because you're a jerk.\"}")
+    } else {
+        w.Header().Set("Content-Type","application/json")
+        w.Write(marshalled)
+    }
+}
+
+func lolXml(w http.ResponseWriter, c appengine.Context, out Lollipop) {
+    w.Header().Set("Content-Type","application/xml")
+    fmt.Fprintf(w, "<jerk who=\"you\">%s/jerk/You</jerk>", appengine.DefaultVersionHostname(c))
+}
+
 func lolHandler(w http.ResponseWriter, r *http.Request) {
     parts := strings.Split(r.URL.Path, "/")
     if len(parts) > 2 {
         out := lolify(parts[2])
+        c := appengine.NewContext(r)
         accept := r.Header.Get("Accept") 
         if accept == "application/json" {
-            if marshalled, err := json.Marshal(out); err != nil {
-                c := appengine.NewContext(r)
-                c.Errorf("Trying to Marshal, but got error %v\n", err)
-                fmt.Fprintf(w, "{\"err\": \"Could not write requested data - probably because you're a jerk.\"}")
-            } else {
-                w.Header().Set("Content-Type","application/json")
-                w.Write(marshalled)
-            }
+            lolJson(w, c, out)
         } else if accept == "application/xml" {
-            w.Header().Set("Content-Type","application/xml")
-            fmt.Fprintf(w, "<jerk who=\"you\">%s/jerk/You</jerk>", hostname(r))
+            lolXml(w, c, out)
         } else {
             fmt.Fprintf(w, "%s", out.Output)
         }
@@ -73,13 +81,10 @@ func lolHandler(w http.ResponseWriter, r *http.Request) {
     }
 }
 
-func hostname(r *http.Request) string {
-    c := appengine.NewContext(r)
-    return appengine.DefaultVersionHostname(c)
-}
-
 func handler(w http.ResponseWriter, r *http.Request) {
-    home.Execute(w, hostname(r))
+    c := appengine.NewContext(r)
+    hostname := appengine.DefaultVersionHostname(c)
+    home.Execute(w, hostname)
 }
 
 var home,_ = template.New("home").Parse(`
@@ -87,7 +92,7 @@ var home,_ = template.New("home").Parse(`
 <head><title>LOL As A Service</title></head>
 <body>
 <h2>LOL</h2>
-<p>LOL As A Service lets you write like @computionist!</p>
+<p>LOL As A Service lets you write like http://twitter.com/computionist !</p>
 <h2>API</h2>
 <h3>/lol/:word</h3>
 <p>This will find the best fitting transformation like:</p>
