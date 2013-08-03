@@ -52,7 +52,8 @@ func lolHandler(w http.ResponseWriter, r *http.Request) {
     parts := strings.Split(r.URL.Path, "/")
     if len(parts) > 2 {
         out := lolify(parts[2])
-        if r.Header.Get("Accept") == "application/json" {
+        accept := r.Header.Get("Accept") 
+        if accept == "application/json" {
             if marshalled, err := json.Marshal(out); err != nil {
                 c := appengine.NewContext(r)
                 c.Errorf("Trying to Marshal, but got error %v\n", err)
@@ -61,6 +62,9 @@ func lolHandler(w http.ResponseWriter, r *http.Request) {
                 w.Header().Set("Content-Type","application/json")
                 w.Write(marshalled)
             }
+        } else if accept == "application/xml" {
+            w.Header().Set("Content-Type","application/xml")
+            fmt.Fprintf(w, "<jerk who=\"you\">%s/jerk/You</jerk>", hostname(r))
         } else {
             fmt.Fprintf(w, "%s", out.Output)
         }
@@ -69,10 +73,13 @@ func lolHandler(w http.ResponseWriter, r *http.Request) {
     }
 }
 
-func handler(w http.ResponseWriter, r *http.Request) {
+func hostname(r *http.Request) string {
     c := appengine.NewContext(r)
-    hostname := appengine.DefaultVersionHostname(c)
-    home.Execute(w, hostname)
+    return appengine.DefaultVersionHostname(c)
+}
+
+func handler(w http.ResponseWriter, r *http.Request) {
+    home.Execute(w, hostname(r))
 }
 
 var home,_ = template.New("home").Parse(`
@@ -101,8 +108,8 @@ pythloln
 </code>
 <h2>Supported Accept Headers</h2>
 <ul>
-<li><h3>application/json</h3><p>Given the Accept header 'application/json', you should receive a JSON string. Otherwise, it's plain text, buddy.</p></li>
-<li><h3>text/xml</h3><p>Given the Accept header 'application/json', you should receive a JSON string. Otherwise, it's plain text, buddy.</p></li>
+<li><h3>application/json</h3><p>Given the Accept header 'application/json', you should receive a JSON string.</p></li>
+<li><h3>application/xml</h3><p>Given the Accept header 'application/xml', you should receive a XML string.</p></li>
 </ul>
 </body>
 </html>
