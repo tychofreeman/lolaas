@@ -88,9 +88,14 @@ func handler(w http.ResponseWriter, r *http.Request) {
 }
 
 var home,_ = template.New("home").Parse(`
-<html>
-<head><title>LOL As A Service</title></head>
-<body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>LOL As A Service</title>
+<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0-rc1/css/bootstrap.min.css">
+</head>
+<body class="container">
+<div class="container">
 <h2>LOL</h2>
 <p>LOL As A Service lets you write like http://twitter.com/computionist !</p>
 <h2>API</h2>
@@ -116,6 +121,7 @@ pythloln
 <li><h3>application/json</h3><p>Given the Accept header 'application/json', you should receive a JSON string.</p></li>
 <li><h3>application/xml</h3><p>Given the Accept header 'application/xml', you should receive a XML string.</p></li>
 </ul>
+</div>
 </body>
 </html>
 `)
