@@ -32,20 +32,29 @@ func init() {
     }
 }
 
-func lolify(in string) string {
+type Lollipop struct {
+    Input string
+    Output string
+}
+
+func (l Lollipop) String() string {
+    return l.Output
+}
+
+func lolify(in string) Lollipop {
     for _, r := range regexes {
         if out, ok := r(in); ok {
-            return out
+            return Lollipop{in, out}
         }
     }
-    return in
+    return Lollipop{in, in}
 }
 
 func lolHandler(w http.ResponseWriter, r *http.Request) {
     parts := strings.Split(r.URL.Path, "/")
     if len(parts) > 2 {
         out := lolify(parts[2])
-        fmt.Fprintf(w, out)
+        fmt.Fprintf(w, "%s", out)
     } else {
         handler(w, r)
     }
