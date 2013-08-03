@@ -5,6 +5,8 @@ import (
     "net/http"
     "strings"
     "regexp"
+    "html/template"
+    "appengine"
 )
 
 type loller func(string)(string,bool)
@@ -50,10 +52,13 @@ func lolHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
-    fmt.Fprintf(w, home)
+    c := appengine.NewContext(r)
+    hostname := appengine.DefaultVersionHostname(c)
+    
+    home.Execute(w, hostname)
 }
 
-var home = `
+var home,_ = template.New("home").Parse(`
 <html>
 <head><title>LOL As A Service</title></head>
 <body>
@@ -69,6 +74,14 @@ var home = `
 <li>castle -> castlol</li>
 <li>haskell -> hasklol</li>
 </ul>
+<h2>Example:</h2>
+<code>
+{{.}}/lol/python
+</code>
+<p>Results in:</p>
+<code>
+pythloln
+</code>
 </body>
 </html>
-`
+`)
