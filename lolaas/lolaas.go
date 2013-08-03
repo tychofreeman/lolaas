@@ -98,6 +98,8 @@ var home,_ = template.New("home").Parse(`
 <code>
 pythloln
 </code>
+<h2>Accepted Accept Headers</h2>
+<p>Given the Accept header 'application/json', you should receive a JSON string. Otherwise, it's plain text, buddy.</p>
 </body>
 </html>
 `)
