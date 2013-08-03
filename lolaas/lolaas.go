@@ -7,26 +7,36 @@ import (
     "regexp"
 )
 
-var lolRegex *regexp.Regexp
-var loRegex *regexp.Regexp
-var olthRegex *regexp.Regexp
+type loller func(string)(string,bool)
+
+func lollifier(r *regexp.Regexp, template string) loller {
+    var l loller = func(in string) (string, bool) {
+        out := r.ReplaceAllString(in, template)
+        return out, (out != in)
+    }
+    return l
+}
+
+var regexes []loller
 func init() {
     http.HandleFunc("/lol/", lolHandler)
     http.HandleFunc("/", handler)
-    lolRegex, _ = regexp.Compile("(.*[abcdfghkpst])o([^l].*)")
-    loRegex, _ = regexp.Compile("(.*[abcdfghkpst])(ol.*)")
-    olthRegex, _ = regexp.Compile("(.*bo)(th.*)")
+    regexes = []loller {
+        lollifier(regexp.MustCompile("(.*bo)(th.*)"), "${1}l${2}"),
+        lollifier(regexp.MustCompile("(.*[abcdfghkpst])o([^l].*)"), "${1}lol${2}"),
+        lollifier(regexp.MustCompile("(.*[abcdfghkpst])(ol.*)"), "${1}l${2}"),
+        lollifier(regexp.MustCompile("(.*)el+"), "${1}lol"),
+        lollifier(regexp.MustCompile("(.*[^l])le"), "${1}lol"),
+    }
 }
 
 func lolify(in string) string {
-    out := olthRegex.ReplaceAllString(in, "${1}l${2}")   
-    if out == in {
-        out = lolRegex.ReplaceAllString(in, "${1}lol${2}")
-        if out == in {
-            out = loRegex.ReplaceAllString(in, "${1}l${2}")
+    for _, r := range regexes {
+        if out, ok := r(in); ok {
+            return out
         }
     }
-    return out
+    return in
 }
 
 func lolHandler(w http.ResponseWriter, r *http.Request) {
@@ -56,6 +66,8 @@ var home = `
 <li>both -> bolth</li>
 <li>python -> pythloln</li>
 <li>dolt -> dlolt</li>
+<li>castle -> castlol</li>
+<li>haskell -> hasklol</li>
 </ul>
 </body>
 </html>
