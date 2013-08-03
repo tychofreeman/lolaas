@@ -7,6 +7,8 @@ import (
     "regexp"
     "html/template"
     "appengine"
+    "encoding/json"
+    
 )
 
 type loller func(string)(string,bool)
@@ -37,10 +39,6 @@ type Lollipop struct {
     Output string
 }
 
-func (l Lollipop) String() string {
-    return l.Output
-}
-
 func lolify(in string) Lollipop {
     for _, r := range regexes {
         if out, ok := r(in); ok {
@@ -54,7 +52,17 @@ func lolHandler(w http.ResponseWriter, r *http.Request) {
     parts := strings.Split(r.URL.Path, "/")
     if len(parts) > 2 {
         out := lolify(parts[2])
-        fmt.Fprintf(w, "%s", out)
+        if r.Header.Get("Accept") == "application/json" {
+            if marshalled, err := json.Marshal(out); err != nil {
+                c := appengine.NewContext(r)
+                c.Errorf("Trying to Marshal, but got error %v\n", err)
+                fmt.Fprintf(w, "{\"err\": \"Could not write requested data - probably because you're a jerk.\"}")
+            } else {
+                w.Write(marshalled)
+            }
+        } else {
+            fmt.Fprintf(w, "%s", out.Output)
+        }
     } else {
         handler(w, r)
     }
@@ -63,7 +71,6 @@ func lolHandler(w http.ResponseWriter, r *http.Request) {
 func handler(w http.ResponseWriter, r *http.Request) {
     c := appengine.NewContext(r)
     hostname := appengine.DefaultVersionHostname(c)
-    
     home.Execute(w, hostname)
 }
 
