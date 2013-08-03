@@ -58,6 +58,7 @@ func lolHandler(w http.ResponseWriter, r *http.Request) {
                 c.Errorf("Trying to Marshal, but got error %v\n", err)
                 fmt.Fprintf(w, "{\"err\": \"Could not write requested data - probably because you're a jerk.\"}")
             } else {
+                w.Header().Set("Content-Type","application/json")
                 w.Write(marshalled)
             }
         } else {
@@ -98,8 +99,11 @@ var home,_ = template.New("home").Parse(`
 <code>
 pythloln
 </code>
-<h2>Accepted Accept Headers</h2>
-<p>Given the Accept header 'application/json', you should receive a JSON string. Otherwise, it's plain text, buddy.</p>
+<h2>Supported Accept Headers</h2>
+<ul>
+<li><h3>application/json</h3><p>Given the Accept header 'application/json', you should receive a JSON string. Otherwise, it's plain text, buddy.</p></li>
+<li><h3>text/xml</h3><p>Given the Accept header 'application/json', you should receive a JSON string. Otherwise, it's plain text, buddy.</p></li>
+</ul>
 </body>
 </html>
 `)
