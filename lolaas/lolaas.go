@@ -40,5 +40,23 @@ func lolHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
-    fmt.Fprintf(w, "LOL!!")
+    fmt.Fprintf(w, home)
 }
+
+var home = `
+<html>
+<head><title>LOL As A Service</title></head>
+<body>
+<h2>LOL</h2>
+<p>LOL As A Service lets you write like @computionist!</p>
+<h2>API</h2>
+<h3>/lol/:word</h3>
+<p>This will find the best fitting transformation like:</p>
+<ul>
+<li>both -> bolth</li>
+<li>python -> pythloln</li>
+<li>dolt -> dlolt</li>
+</ul>
+</body>
+</html>
+`
