@@ -10,15 +10,15 @@ import (
     
 )
 
-type Handler func(http.ResponseWriter, appengine.Context, interface{})
+type ContentTypeWriter func(http.ResponseWriter, appengine.Context, interface{})
 
-var contentHandlers map[string]Handler
+var contentTypeWriters map[string]ContentTypeWriter
 func init() {
     http.HandleFunc("/lol/", lolHandler)
     http.HandleFunc("/jerk/", jerkHandler)
     http.HandleFunc("/", handler)
 
-    contentHandlers = map[string]Handler{
+    contentTypeWriters = map[string]ContentTypeWriter{
         "application/json":handleJSONType,
         "application/xml" :handleXMLType,
     }
@@ -45,8 +45,8 @@ func handlePlainText(w http.ResponseWriter, c appengine.Context, out interface{}
 
 func writeWithContentType(w http.ResponseWriter, r *http.Request, out interface{}) {
     accept := r.Header.Get("Accept") 
-    var handler Handler = handlePlainText
-    if h, err := contentHandlers[accept]; err {
+    var handler ContentTypeWriter = handlePlainText
+    if h, err := contentTypeWriters[accept]; err {
         handler = h
     }
 
