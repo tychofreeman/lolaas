@@ -35,8 +35,48 @@ func init() {
     }
 }
 
+func handleJSONType(w http.ResponseWriter, c appengine.Context, out interface{}) {
+    if marshalled, err := json.Marshal(out); err != nil {
+        c.Errorf("Trying to Marshal, but got error %v\n", err)
+        fmt.Fprintf(w, "{\"err\": \"Could not write requested data - probably because you're a jerk.\"}")
+    } else {
+        w.Header().Set("Content-Type","application/json")
+        w.Write(marshalled)
+    }
+}
+
+func handleXMLType(w http.ResponseWriter, c appengine.Context, out interface{}) {
+    w.Header().Set("Content-Type","application/xml")
+    fmt.Fprintf(w, "<jerk who=\"you\">%s/jerk/You</jerk>", appengine.DefaultVersionHostname(c))
+}
+
+func handlePlainText(w http.ResponseWriter, c appengine.Context, out interface{}) {
+    fmt.Fprintf(w, "%v", out)
+}
+
+func handleContentType(w http.ResponseWriter, r *http.Request, out interface{}) {
+    c := appengine.NewContext(r)
+    accept := r.Header.Get("Accept") 
+    if accept == "application/json" {
+        handleJSONType(w, c, out)
+    } else if accept == "application/xml" {
+        handleXMLType(w, c, out)
+    } else {
+        handlePlainText(w, c, out)
+    }
+}
+
+type Jerk struct {
+    Who string
+    Type string
+}
+
+func (j Jerk) String() string {
+    return j.Who + " are a " + j.Type
+}
+
 func jerkHandler(w http.ResponseWriter, r *http.Request) {
-   fmt.Fprintf(w, "You are a jerk.")
+   handleContentType(w, r, Jerk{"You", "jerk"})
 }
 
 type Lollipop struct {
@@ -57,34 +97,11 @@ func lolify(in string) Lollipop {
     return Lollipop{in, in}
 }
 
-func lolJson(w http.ResponseWriter, c appengine.Context, out Lollipop) {
-    if marshalled, err := json.Marshal(out); err != nil {
-        c.Errorf("Trying to Marshal, but got error %v\n", err)
-        fmt.Fprintf(w, "{\"err\": \"Could not write requested data - probably because you're a jerk.\"}")
-    } else {
-        w.Header().Set("Content-Type","application/json")
-        w.Write(marshalled)
-    }
-}
-
-func lolXml(w http.ResponseWriter, c appengine.Context, out Lollipop) {
-    w.Header().Set("Content-Type","application/xml")
-    fmt.Fprintf(w, "<jerk who=\"you\">%s/jerk/You</jerk>", appengine.DefaultVersionHostname(c))
-}
-
 func lolHandler(w http.ResponseWriter, r *http.Request) {
     parts := strings.Split(r.URL.Path, "/")
     if len(parts) > 2 {
         out := lolify(parts[2])
-        c := appengine.NewContext(r)
-        accept := r.Header.Get("Accept") 
-        if accept == "application/json" {
-            lolJson(w, c, out)
-        } else if accept == "application/xml" {
-            lolXml(w, c, out)
-        } else {
-            fmt.Fprintf(w, "%v", out)
-        }
+        handleContentType(w, r, out)
     } else {
         handler(w, r)
     }
