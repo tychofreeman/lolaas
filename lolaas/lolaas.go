@@ -92,10 +92,52 @@ var home,_ = template.New("home").Parse(`
 <html lang="en">
 <head>
 <title>LOL As A Service</title>
-<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0-rc1/css/bootstrap.min.css">
+<!--link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0-rc1/css/bootstrap.min.css" -->
+<style>
+.main{
+    top: 5%;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin:0px auto; 
+    width: 50%;
+    position: absolute;
+    overflow: auto;
+    border: solid 1px;
+    border-color: #eeeeee;
+}
+
+.header{
+    top: 0%;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 12%;
+    background: red;
+    margin:0px auto; 
+    position: relative;
+    overflow: auto;
+    border: solid 2px;
+    border-color: black;
+    text-align: center;
+    margin-top: auto;
+    margin-bottom: auto;
+    display:table;
+    width:99%;
+}
+
+.big-title {
+    vertical-align: middle;
+    display:table-cell;
+}
+
+</style>
 </head>
 <body class="container">
-<div class="container">
+<div class="container main">
+<div class="header">
+<h1 class="big-title">Laugh-Out-Loud As A Service</h1>
+</div>
 <h2>LOL</h2>
 <p>LOL As A Service lets you write like http://twitter.com/computionist !</p>
 <h2>API</h2>
