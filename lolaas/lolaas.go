@@ -45,12 +45,12 @@ func writePlainText(w http.ResponseWriter, c appengine.Context, out interface{})
 
 func writeWithContentType(w http.ResponseWriter, r *http.Request, out interface{}) {
     accept := r.Header.Get("Accept") 
-    var handler ContentTypeWriter = writePlainText
-    if h, err := contentTypeWriters[accept]; err {
-        handler = h
+    var writer ContentTypeWriter = writePlainText
+    if ctw, err := contentTypeWriters[accept]; err {
+        writer = ctw
     }
 
-    handler(w, appengine.NewContext(r), out)
+    writer(w, appengine.NewContext(r), out)
 }
 
 func jerkHandler(w http.ResponseWriter, r *http.Request) {
