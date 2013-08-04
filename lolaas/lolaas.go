@@ -19,12 +19,12 @@ func init() {
     http.HandleFunc("/", handler)
 
     contentTypeWriters = map[string]ContentTypeWriter{
-        "application/json":handleJSONType,
-        "application/xml" :handleXMLType,
+        "application/json":writeJSON,
+        "application/xml" :writeXML,
     }
 }
 
-func handleJSONType(w http.ResponseWriter, c appengine.Context, out interface{}) {
+func writeJSON(w http.ResponseWriter, c appengine.Context, out interface{}) {
     if marshalled, err := json.Marshal(out); err != nil {
         c.Errorf("Trying to Marshal, but got error %v\n", err)
         fmt.Fprintf(w, "{\"err\": \"Could not write requested data - probably because you're a jerk.\"}")
@@ -34,18 +34,18 @@ func handleJSONType(w http.ResponseWriter, c appengine.Context, out interface{})
     }
 }
 
-func handleXMLType(w http.ResponseWriter, c appengine.Context, out interface{}) {
+func writeXML(w http.ResponseWriter, c appengine.Context, out interface{}) {
     w.Header().Set("Content-Type","application/xml")
     fmt.Fprintf(w, "<jerk who=\"you\">%s/jerk/You</jerk>", appengine.DefaultVersionHostname(c))
 }
 
-func handlePlainText(w http.ResponseWriter, c appengine.Context, out interface{}) {
+func writePlainText(w http.ResponseWriter, c appengine.Context, out interface{}) {
     fmt.Fprintf(w, "%v", out)
 }
 
 func writeWithContentType(w http.ResponseWriter, r *http.Request, out interface{}) {
     accept := r.Header.Get("Accept") 
-    var handler ContentTypeWriter = handlePlainText
+    var handler ContentTypeWriter = writePlainText
     if h, err := contentTypeWriters[accept]; err {
         handler = h
     }
