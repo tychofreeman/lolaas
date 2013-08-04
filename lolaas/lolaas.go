@@ -144,7 +144,7 @@ var home,_ = template.New("home").Parse(`
 <h1 class="big-title">Laugh-Out-Loud As A Service</h1>
 </div>
 <h2>LOL</h2>
-<p>LOL As A Service lets you write like http://twitter.com/computionist !</p>
+<p>LOL As A Service lets you write like <a href="http://twitter.com/computionist">Doctor Gonzo</a>!</p>
 <h2>API</h2>
 <h3>/lol/:word</h3>
 <p>This will find the best fitting transformation like:</p>
@@ -155,7 +155,9 @@ var home,_ = template.New("home").Parse(`
 <li>castle -> castlol</li>
 <li>haskell -> hasklol</li>
 </ul>
-<h2>Example:</h2>
+<h3>/jerk</h3>
+<p>This will print out a string which declares the user to be a jerk.</p>
+<h2>Examples:</h2>
 <code>
 {{.}}/lol/python
 </code>
@@ -163,7 +165,7 @@ var home,_ = template.New("home").Parse(`
 <code>
 pythloln
 </code>
-<h2>Supported Accept Headers</h2>
+<h2>Supported Accept Headers (Currently working for /lol/ only.)</h2>
 <ul>
 <li><h3>application/json</h3><p>Given the Accept header 'application/json', you should receive a JSON string.</p></li>
 <li><h3>application/xml</h3><p>Given the Accept header 'application/xml', you should receive a XML string.</p></li>
