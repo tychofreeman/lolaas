@@ -4,39 +4,19 @@ import (
     "fmt"
     "net/http"
     "strings"
-    "regexp"
     "html/template"
     "appengine"
     "encoding/json"
     
 )
 
-type loller func(string)(string,bool)
-
-func lollifier(r *regexp.Regexp, template string) loller {
-    var l loller = func(in string) (string, bool) {
-        out := r.ReplaceAllString(in, template)
-        return out, (out != in)
-    }
-    return l
-}
-
 type Handler func(http.ResponseWriter, appengine.Context, interface{})
 
-var regexes []loller
 var contentHandlers map[string]Handler
 func init() {
     http.HandleFunc("/lol/", lolHandler)
     http.HandleFunc("/jerk/", jerkHandler)
     http.HandleFunc("/", handler)
-
-    regexes = []loller {
-        lollifier(regexp.MustCompile("(.*bo)(th.*)"), "${1}l${2}"),
-        lollifier(regexp.MustCompile("(.*[abcdfghkpst])o([^l].*)"), "${1}lol${2}"),
-        lollifier(regexp.MustCompile("(.*[abcdfghkpst])(ol.*)"), "${1}l${2}"),
-        lollifier(regexp.MustCompile("(.*)el+"), "${1}lol"),
-        lollifier(regexp.MustCompile("(.*[^l])le"), "${1}lol"),
-    }
 
     contentHandlers = map[string]Handler{
         "application/json":handleJSONType,
@@ -63,7 +43,7 @@ func handlePlainText(w http.ResponseWriter, c appengine.Context, out interface{}
     fmt.Fprintf(w, "%v", out)
 }
 
-func handleContentType(w http.ResponseWriter, r *http.Request, out interface{}) {
+func writeWithContentType(w http.ResponseWriter, r *http.Request, out interface{}) {
     accept := r.Header.Get("Accept") 
     var handler Handler = handlePlainText
     if h, err := contentHandlers[accept]; err {
@@ -73,42 +53,15 @@ func handleContentType(w http.ResponseWriter, r *http.Request, out interface{}) 
     handler(w, appengine.NewContext(r), out)
 }
 
-type Jerk struct {
-    Who string
-    Type string
-}
-
-func (j Jerk) String() string {
-    return j.Who + " are a " + j.Type
-}
-
 func jerkHandler(w http.ResponseWriter, r *http.Request) {
-   handleContentType(w, r, Jerk{"You", "jerk"})
-}
-
-type Lollipop struct {
-    Input string
-    Output string
-}
-
-func (l Lollipop)String() string{
-    return l.Output
-}
-
-func applyBestLol(in string) Lollipop {
-    for _, r := range regexes {
-        if out, ok := r(in); ok {
-            return Lollipop{in, out}
-        }
-    }
-    return Lollipop{in, in}
+   writeWithContentType(w, r, Jerk{"You", "jerk"})
 }
 
 func lolHandler(w http.ResponseWriter, r *http.Request) {
     parts := strings.Split(r.URL.Path, "/")
     if len(parts) > 2 {
         out := applyBestLol(parts[2])
-        handleContentType(w, r, out)
+        writeWithContentType(w, r, out)
     } else {
         handler(w, r)
     }
