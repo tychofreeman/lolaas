@@ -21,17 +21,26 @@ func lollifier(r *regexp.Regexp, template string) loller {
     return l
 }
 
+type Handler func(http.ResponseWriter, appengine.Context, interface{})
+
 var regexes []loller
+var contentHandlers map[string]Handler
 func init() {
     http.HandleFunc("/lol/", lolHandler)
     http.HandleFunc("/jerk/", jerkHandler)
     http.HandleFunc("/", handler)
+
     regexes = []loller {
         lollifier(regexp.MustCompile("(.*bo)(th.*)"), "${1}l${2}"),
         lollifier(regexp.MustCompile("(.*[abcdfghkpst])o([^l].*)"), "${1}lol${2}"),
         lollifier(regexp.MustCompile("(.*[abcdfghkpst])(ol.*)"), "${1}l${2}"),
         lollifier(regexp.MustCompile("(.*)el+"), "${1}lol"),
         lollifier(regexp.MustCompile("(.*[^l])le"), "${1}lol"),
+    }
+
+    contentHandlers = map[string]Handler{
+        "application/json":handleJSONType,
+        "application/xml" :handleXMLType,
     }
 }
 
@@ -55,15 +64,13 @@ func handlePlainText(w http.ResponseWriter, c appengine.Context, out interface{}
 }
 
 func handleContentType(w http.ResponseWriter, r *http.Request, out interface{}) {
-    c := appengine.NewContext(r)
     accept := r.Header.Get("Accept") 
-    if accept == "application/json" {
-        handleJSONType(w, c, out)
-    } else if accept == "application/xml" {
-        handleXMLType(w, c, out)
-    } else {
-        handlePlainText(w, c, out)
+    var handler Handler = handlePlainText
+    if h, err := contentHandlers[accept]; err {
+        handler = h
     }
+
+    handler(w, appengine.NewContext(r), out)
 }
 
 type Jerk struct {
@@ -88,7 +95,7 @@ func (l Lollipop)String() string{
     return l.Output
 }
 
-func lolify(in string) Lollipop {
+func applyBestLol(in string) Lollipop {
     for _, r := range regexes {
         if out, ok := r(in); ok {
             return Lollipop{in, out}
@@ -100,7 +107,7 @@ func lolify(in string) Lollipop {
 func lolHandler(w http.ResponseWriter, r *http.Request) {
     parts := strings.Split(r.URL.Path, "/")
     if len(parts) > 2 {
-        out := lolify(parts[2])
+        out := applyBestLol(parts[2])
         handleContentType(w, r, out)
     } else {
         handler(w, r)
