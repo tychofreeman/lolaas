@@ -24,6 +24,7 @@ func lollifier(r *regexp.Regexp, template string) loller {
 var regexes []loller
 func init() {
     http.HandleFunc("/lol/", lolHandler)
+    http.HandleFunc("/jerk/", jerkHandler)
     http.HandleFunc("/", handler)
     regexes = []loller {
         lollifier(regexp.MustCompile("(.*bo)(th.*)"), "${1}l${2}"),
@@ -32,6 +33,10 @@ func init() {
         lollifier(regexp.MustCompile("(.*)el+"), "${1}lol"),
         lollifier(regexp.MustCompile("(.*[^l])le"), "${1}lol"),
     }
+}
+
+func jerkHandler(w http.ResponseWriter, r *http.Request) {
+   fmt.Fprintf(w, "You are a jerk.")
 }
 
 type Lollipop struct {
