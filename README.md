@@ -1,6 +1,6 @@
 # Laugh-Out-Loud As A Service
 
-Inspired by foaas.com and http://twitter.com/computionist, this started as a 
+Inspired by http://foaas.com and http://twitter.com/computionist, this started as a 
 project to generate lol-ified words.
 
 For example, from the word 'Python' we generate the word 'Pythloln'. From the
