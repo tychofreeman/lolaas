@@ -44,6 +44,10 @@ type Lollipop struct {
     Output string
 }
 
+func (l Lollipop)String() string{
+    return l.Output
+}
+
 func lolify(in string) Lollipop {
     for _, r := range regexes {
         if out, ok := r(in); ok {
@@ -79,7 +83,7 @@ func lolHandler(w http.ResponseWriter, r *http.Request) {
         } else if accept == "application/xml" {
             lolXml(w, c, out)
         } else {
-            fmt.Fprintf(w, "%s", out.Output)
+            fmt.Fprintf(w, "%v", out)
         }
     } else {
         handler(w, r)
@@ -107,9 +111,6 @@ var home,_ = template.New("home").Parse(`
     margin:0px auto; 
     width: 50%;
     position: absolute;
-    overflow: auto;
-    border: solid 1px;
-    border-color: #eeeeee;
 }
 
 .header{
@@ -167,9 +168,11 @@ pythloln
 </code>
 <h2>Supported Accept Headers (Currently working for /lol/ only.)</h2>
 <ul>
+<li><h3>--default--</h3><p>Given the default Accept header, you should receive a plain text string.</p></li>
 <li><h3>application/json</h3><p>Given the Accept header 'application/json', you should receive a JSON string.</p></li>
 <li><h3>application/xml</h3><p>Given the Accept header 'application/xml', you should receive a XML string.</p></li>
 </ul>
+<br/>
 </div>
 </body>
 </html>
